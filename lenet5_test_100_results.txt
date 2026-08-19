@@ -1,0 +1,127 @@
+Keys found in state_dict:
+features.0.weight
+features.0.bias
+features.3.weight
+features.3.bias
+classifier.1.weight
+classifier.1.bias
+classifier.3.weight
+classifier.3.bias
+classifier.5.weight
+classifier.5.bias
+PyTorch weights loaded successfully.
+Test dataset size: 10000
+Images to compare: 100
+First image shape: torch.Size([1, 28, 28])
+First image label: 7
+Image   1/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 5.152e-07
+Image   2/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 3.813e-07
+Image   3/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 1.193e-06
+Image   4/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 3.819e-07
+Image   5/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.850e-07
+Image   6/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 9.132e-07
+Image   7/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 3.174e-07
+Image   8/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 5.125e-07
+Image   9/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 3.934e-07
+Image  10/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 5.043e-07
+Image  11/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 2.861e-07
+Image  12/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 1.440e-07
+Image  13/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 5.082e-07
+Image  14/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 2.693e-07
+Image  15/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 5.383e-07
+Image  16/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 3.986e-07
+Image  17/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 4.367e-07
+Image  18/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 5.512e-07
+Image  19/100 | Label: 3 | PyTorch: 8 | Manual: 8 | RMSE: 7.769e-07
+Image  20/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.497e-07
+Image  21/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 5.220e-07
+Image  22/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 4.183e-07
+Image  23/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 2.078e-07
+Image  24/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 2.793e-07
+Image  25/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.065e-07
+Image  26/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 3.635e-07
+Image  27/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 6.000e-07
+Image  28/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.324e-07
+Image  29/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 1.392e-07
+Image  30/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 3.893e-07
+Image  31/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 4.532e-07
+Image  32/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 5.402e-07
+Image  33/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 3.950e-07
+Image  34/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 4.758e-07
+Image  35/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 2.230e-07
+Image  36/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 3.416e-07
+Image  37/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 3.245e-07
+Image  38/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 5.962e-07
+Image  39/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 7.881e-07
+Image  40/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 5.257e-07
+Image  41/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 1.664e-06
+Image  42/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 4.299e-07
+Image  43/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.341e-07
+Image  44/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 8.716e-07
+Image  45/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 4.620e-07
+Image  46/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 6.192e-07
+Image  47/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 5.986e-07
+Image  48/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 6.244e-07
+Image  49/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.210e-07
+Image  50/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 2.025e-07
+Image  51/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 3.226e-07
+Image  52/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 4.543e-07
+Image  53/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 4.462e-07
+Image  54/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 3.595e-07
+Image  55/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 5.008e-07
+Image  56/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 2.751e-07
+Image  57/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 3.189e-07
+Image  58/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 1.039e-06
+Image  59/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 3.943e-07
+Image  60/100 | Label: 5 | PyTorch: 5 | Manual: 5 | RMSE: 1.098e-06
+Image  61/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 3.720e-07
+Image  62/100 | Label: 8 | PyTorch: 8 | Manual: 8 | RMSE: 5.539e-07
+Image  63/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 9.609e-07
+Image  64/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 5.647e-07
+Image  65/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 7.156e-07
+Image  66/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 5.035e-07
+Image  67/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 3.412e-07
+Image  68/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 3.361e-07
+Image  69/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 3.448e-07
+Image  70/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 2.883e-07
+Image  71/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 2.881e-07
+Image  72/100 | Label: 0 | PyTorch: 0 | Manual: 0 | RMSE: 2.648e-07
+Image  73/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 4.475e-07
+Image  74/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 7.539e-07
+Image  75/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 4.157e-07
+Image  76/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 4.934e-07
+Image  77/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 5.244e-07
+Image  78/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 7.524e-07
+Image  79/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 8.526e-07
+Image  80/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 4.663e-07
+Image  81/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 2.623e-07
+Image  82/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 3.169e-07
+Image  83/100 | Label: 2 | PyTorch: 2 | Manual: 2 | RMSE: 2.950e-07
+Image  84/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 2.808e-07
+Image  85/100 | Label: 8 | PyTorch: 8 | Manual: 8 | RMSE: 3.555e-07
+Image  86/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 1.715e-07
+Image  87/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 3.675e-07
+Image  88/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 6.035e-07
+Image  89/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 5.146e-07
+Image  90/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 6.881e-07
+Image  91/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 3.127e-07
+Image  92/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 4.073e-07
+Image  93/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 5.521e-07
+Image  94/100 | Label: 3 | PyTorch: 3 | Manual: 3 | RMSE: 4.187e-07
+Image  95/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 6.341e-07
+Image  96/100 | Label: 4 | PyTorch: 4 | Manual: 4 | RMSE: 3.430e-07
+Image  97/100 | Label: 1 | PyTorch: 1 | Manual: 1 | RMSE: 8.453e-07
+Image  98/100 | Label: 7 | PyTorch: 7 | Manual: 7 | RMSE: 8.032e-07
+Image  99/100 | Label: 6 | PyTorch: 6 | Manual: 6 | RMSE: 3.661e-07
+Image 100/100 | Label: 9 | PyTorch: 9 | Manual: 9 | RMSE: 4.177e-07
+
+=======================================================
+LeNet-5 PyTorch vs Manual - Test Summary
+=======================================================
+Images tested:             100
+Same predictions:          100/100
+PyTorch accuracy:          99.00%
+Manual accuracy:           99.00%
+Average RMSE:              4.79098395e-07
+Maximum RMSE:              1.66363046e-06
+Maximum absolute error:    2.56453543e-06
