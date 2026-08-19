@@ -7,3 +7,7 @@ venv/
 build/
 CMakeFiles/
 CMakeCache.txt
+data/
+*.pth
+*.pt
+*.log
