@@ -11,3 +11,4 @@ data/
 *.pth
 *.pt
 *.log
+LeNet.py
