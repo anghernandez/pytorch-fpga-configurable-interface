@@ -5,7 +5,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 
-from LeNet5_manual import ManualLeNet5
+from python.models.LeNet5_manual import ManualLeNet5
 
 class LeNet5PyTorch(nn.Module):
     def __init__(self):
@@ -59,7 +59,7 @@ class LeNet5PyTorch(nn.Module):
 pytorch_model = LeNet5PyTorch()
 
 state_dict = torch.load(
-    "lenet5_reference.pth",
+    "weights/lenet5_reference.pth",
     map_location="cpu"
 )
 
@@ -71,7 +71,7 @@ pytorch_model.eval()
 manual_model = ManualLeNet5()
 
 manual_model.load_pytorch_weights(
-    "lenet5_reference.pth"
+    "weights/lenet5_reference.pth"
 )
 
 
@@ -91,7 +91,7 @@ test_dataset = torchvision.datasets.MNIST(
     download=True
 )
 
-#num_images = 1000
+#num_images = 10
 num_images = len(test_dataset)
 
 print("Test dataset size:", len(test_dataset))

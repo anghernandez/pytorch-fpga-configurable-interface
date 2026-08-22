@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from layers.AvgPool2d import ManualAvgPool2d
+from python.layers.AvgPool2d import ManualAvgPool2d
 
 
 TOLERANCE = 1e-5

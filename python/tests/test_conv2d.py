@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 
-from layers.Conv2D import ManualConv2d
+from python.layers.Conv2D import ManualConv2d
 
 def calculate_rmse(reference, prediction):
 

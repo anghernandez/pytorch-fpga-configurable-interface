@@ -4,10 +4,10 @@ import torchvision
 import torchvision.transforms as transforms 
 import torch.nn as nn
 
-from layers.Conv2D import ManualConv2d
-from layers.AvgPool2d import ManualAvgPool2d
-from layers.Linear import ManualLinear
-from layers.Tanh import ManualTanh
+from python.layers.Conv2D import ManualConv2d
+from python.layers.AvgPool2d import ManualAvgPool2d
+from python.layers.Linear import ManualLinear
+from python.layers.Tanh import ManualTanh
 
 
 class ManualLeNet5:
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     model = ManualLeNet5()
 
     model.load_pytorch_weights(
-        "lenet5_reference.pth"
+        "weights/lenet5_reference.pth"
     )
 
     x = [

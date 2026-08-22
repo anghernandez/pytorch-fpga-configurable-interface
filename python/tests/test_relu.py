@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-from layers.ReLU import ManualReLU
+from python.layers.ReLU import ManualReLU
 
 
 RMSE_LIMIT = 1e-3

@@ -1,6 +1,6 @@
 import torch
 
-from layers.ElementWise import ManualElementWise
+from python.layers.ElementWise import ManualElementWise
 
 
 def run_elementwise_test(
