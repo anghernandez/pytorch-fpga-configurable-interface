@@ -12,3 +12,5 @@ data/
 *.pt
 *.log
 LeNet.py
+.pytest_cache/
+
