@@ -7,3 +7,10 @@ venv/
 build/
 CMakeFiles/
 CMakeCache.txt
+data/
+*.pth
+*.pt
+*.log
+LeNet.py
+.pytest_cache/
+
