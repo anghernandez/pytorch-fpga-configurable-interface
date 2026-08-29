@@ -121,12 +121,16 @@ def main() -> None:
         weights_only=True
     )
 
+    #Modelo de referencia PyTorch
     pytorch_model = LeNet5PyTorch()
     pytorch_model.load_state_dict(state_dict)
     pytorch_model.eval()
 
     cpp_model = CppLeNet5()
-    cpp_model.load_state_dict(state_dict)
+    cpp_model.load_pytorch_weights(
+        WEIGHTS_PATH
+    )
+
     cpp_model.eval()
 
     print("Test dataset size:", len(test_dataset))
