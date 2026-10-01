@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from cpp_layers import (
+from wrappers import (
     CppAvgPool2d,
     CppConv2d,
     CppLinear,

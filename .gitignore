@@ -14,3 +14,63 @@ data/
 LeNet.py
 .pytest_cache/
 
+
+# Python / tools
+.ipcache/
+
+# Native test executables
+cpp/test_*
+
+# Vitis / Vivado generated files
+.Xil/
+*.jou
+*.str
+*.wdb
+*.wcfg
+
+# OS / editor temporary files
+*~
+*.swp
+*.swo
+
+# ==================================================
+# Vitis / Vivado / HLS generated project directories
+# Keep source code (HW/) and deployment packages
+# (package.hw/) under version control.
+# ==================================================
+hls/**/_ide/
+hls/**/_x/
+hls/**/.ipcache/
+hls/**/*_hls/
+hls/**/*_system/
+hls/**/platform/
+hls/**/build/
+hls/**/logs/
+hls/**/reports/
+hls/**/hw_link/
+
+# Old/failed generated FPGA builds
+hls/fpga_kernels_v1.0_failed/
+
+# HLS compiled test executables
+hls/**/HW/*_test
+
+# Intermediate FPGA packaging artifacts
+hls/**/system.bit
+hls/**/system.bit.bin
+hls/**/bootgen.bif
+
+# Generated multi-kernel container project
+hls/fpga_kernels_container/
+
+# Additional HLS/Vitis generated metadata
+hls/**/.analyzer_session.json
+hls/**/*.package_summary
+hls/**/*.bif
+
+# Legacy/generated deployment directories
+hls/Tanh/firmware/
+hls/fpga_kernels/respaldo_v1.0.XOJfOI/
+
+# Generated Vitis multi-kernel link/implementation project
+/fpga_kernels_container/

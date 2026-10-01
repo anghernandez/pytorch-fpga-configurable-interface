@@ -101,7 +101,7 @@ class LeNet5(nn.Module):
             nn.AvgPool2d(
                 kernel_size=2,
                 stride=2
-            ), #reduce a la mitad [batch ,6,16,16]
+            ), #reduce a la mitad [batch ,6,14,14]
 
             nn.Conv2d(
                 in_channels=6,
@@ -305,7 +305,7 @@ print(
 
 torch.save(
     model.state_dict(),
-    "lenet5_pytorch.pth"
+    "lenet5_reference.pth"
 )
 
 print("Model weights saved successfully.")
