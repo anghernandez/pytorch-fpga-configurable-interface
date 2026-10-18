@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-venv/
-*.o
-*.so
-.vscode/
-build/
-CMakeFiles/
-CMakeCache.txt
