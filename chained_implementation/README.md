@@ -56,9 +56,14 @@ python3 -c "import torch, torchvision, numpy, PIL, pybind11; print('torch:', tor
 ```
 
 
-## 3. Instalar la aplicación FPGA
 
-La carpeta `fpga_accelerators/` del repositorio debe contener:
+## 3. Instalar y cargar la aplicación FPGA
+
+Este procedimiento debe realizarse **la primera vez que se utiliza el proyecto en una Kria KV260**, después de reinstalar el sistema operativo o cuando la aplicación FPGA ya no esté disponible.
+
+### 3.1. Verificar los archivos del acelerador
+
+Desde la raíz de `chained_implementation`, comprobar que el directorio `fpga_accelerators/` contiene:
 
 ```text
 fpga_accelerators/
@@ -68,28 +73,68 @@ fpga_accelerators/
 └── shell.json
 ```
 
-Instalar el paquete en la Kria:
+Para verificar:
+
+```bash
+ls -lh fpga_accelerators/
+```
+
+### 3.2. Instalar la aplicación FPGA
+
+Crear el directorio de instalación y copiar los archivos:
 
 ```bash
 sudo mkdir -p /lib/firmware/xilinx/fpga_accelerators
 sudo cp fpga_accelerators/* /lib/firmware/xilinx/fpga_accelerators/
 ```
 
-Comprobar y cargar la aplicación:
+Esta instalación permite que `xmutil` reconozca la aplicación FPGA.
+
+### 3.3. Verificar las aplicaciones disponibles
 
 ```bash
 sudo xmutil listapps
+```
+
+Si existe otra aplicación activa, como `k26-starter-kits`, será necesario descargarla antes de cargar el acelerador del proyecto.
+
+**Advertencia:** descargar una aplicación interrumpe cualquier ejecución activa sobre la FPGA.
+
+```bash
+sudo xmutil unloadapp
+```
+
+### 3.4. Cargar el acelerador
+
+```bash
 sudo xmutil loadapp fpga_accelerators
+```
+
+Verificar nuevamente:
+
+```bash
 sudo xmutil listapps
 ```
 
-Si otra aplicación ocupa el slot, descargarla antes con `sudo xmutil unloadapp` (esto interrumpe el diseño FPGA activo). La aplicación cargada debe aparecer con un `Active_slot` distinto de `-1`.
+La aplicación `fpga_accelerators` debe aparecer con un valor de `Active_slot` distinto de `-1`.
 
-El runtime busca el XCLBIN en la ruta fija:
+### 3.5. Consideraciones para ejecuciones posteriores
+
+Una vez instalada la aplicación, no es necesario volver a copiar los archivos para cada ejecución.
+
+Antes de utilizar la interfaz:
+
+1. Comprobar el estado mediante `sudo xmutil listapps`.
+2. Si `fpga_accelerators` está activa, continuar con la ejecución.
+3. Si está instalada pero no activa, cargarla mediante `sudo xmutil loadapp fpga_accelerators`, descargando previamente cualquier aplicación que ocupe el slot.
+
+El runtime XRT utiliza el archivo:
 
 ```text
 /lib/firmware/xilinx/fpga_accelerators/fpga_kernels.xclbin
 ```
+
+La compilación de los kernels HLS y la generación del bitstream no forman parte de este procedimiento.
 
 ## 4. Compilar la interfaz
 

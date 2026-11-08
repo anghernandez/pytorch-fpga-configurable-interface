@@ -1,7 +1,3 @@
-"""Prueba integral pendiente de ejecutar en la Kria KV260.
-
-Valida un único DAG que utiliza los siete nuevos wrappers y los dos anteriores.
-"""
 import torch
 from torch import nn
 import torch.nn.functional as F

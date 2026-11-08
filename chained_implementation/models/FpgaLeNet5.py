@@ -1,8 +1,3 @@
-"""LeNet-5 FPGA mediante wrappers que registran operaciones en un DAG diferido.
-
-La construcción y ejecución del DAG son responsabilidad de FpgaGraph,
-no de este módulo. No se modifica la arquitectura original.
-"""
 import torch
 from torch import nn
 

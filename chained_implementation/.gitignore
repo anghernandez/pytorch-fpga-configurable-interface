@@ -28,16 +28,3 @@ __pycache__/
 
 # Sistema
 .DS_Store
-
-# Dataset MNIST
-data/MNIST/
-
-# Ejecutables de pruebas individuales
-host/wrappers/*/*_host
-host/wrappers/*/test_conv2d_package
-
-# Aceleradores FPGA individuales
-host/wrappers/*/*.xclbin
-host/wrappers/*/*.bit.bin
-host/wrappers/*/*.dtbo
-host/wrappers/*/shell.json

@@ -26,6 +26,8 @@ from torchvision import datasets, transforms
 from fpga_graph import FpgaGraph
 from models.FpgaLeNet5 import FpgaLeNet5
 
+import time
+import fpga_dag
 
 # ============================================================
 # MODELO DE REFERENCIA PYTORCH
@@ -76,317 +78,323 @@ class ReferenceLeNet5(nn.Module):
         return x
 
 
-# ============================================================
 # FUNCIÓN PRINCIPAL
-# ============================================================
 
 def main():
-
     # --------------------------------------------------------
-    # ARGUMENTOS
+    # Configuración de la prueba
     # --------------------------------------------------------
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "--weights",
-        default="weights/lenet5_reference.pth"
+        default="weights/lenet5_reference.pth",
     )
+    parser.add_argument("--data", default="./data")
+    parser.add_argument("--download", action="store_true")
+    parser.add_argument("--limit", type=int, default=10000)
+    parser.add_argument("--tolerance", type=float, default=1e-4)
 
+    parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
-        "--data",
-        default="./data"
-    )
-
-    parser.add_argument(
-        "--tolerance",
-        type=float,
-        default=1e-4
-    )
-
-    parser.add_argument(
-        "--download",
-        action="store_true",
-        help="Descargar MNIST si no está disponible"
-    )
-
-    parser.add_argument(
-        "--limit",
+        "--inflight-batches",
         type=int,
-        default=10000,
-        help="Cantidad de imágenes que se evaluarán"
+        default=4,
+        help="Batches entregados juntos al planificador",
+    )
+    parser.add_argument("--repeats", type=int, default=5)
+    parser.add_argument("--warmup", type=int, default=1)
+    parser.add_argument("--rest", type=float, default=5.0)
+    parser.add_argument(
+        "--mode",
+        choices=("sequential", "pipeline", "both"),
+        default="both",
     )
 
     args = parser.parse_args()
 
-    # --------------------------------------------------------
-    # CARGAR MNIST
-    # --------------------------------------------------------
+    if args.limit <= 0:
+        parser.error("--limit debe ser positivo")
+    if args.batch_size <= 0 or args.inflight_batches <= 0:
+        parser.error("Los tamaños de batch y ventana deben ser positivos")
+    if args.repeats <= 0 or args.warmup < 0:
+        parser.error("--repeats debe ser positivo y --warmup no negativo")
+    if not math.isfinite(args.rest) or args.rest < 0:
+        parser.error("--rest debe ser finito y no negativo")
+    if not math.isfinite(args.tolerance) or args.tolerance <= 0:
+        parser.error("--tolerance debe ser finita y positiva")
 
-    print("\nCargando conjunto de prueba MNIST...")
-
+    # --------------------------------------------------------
+    # Preparar imágenes fuera del cronómetro
+    # --------------------------------------------------------
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(
             mean=(0.1307,),
-            std=(0.3081,)
-        )
+            std=(0.3081,),
+        ),
     ])
 
     dataset = datasets.MNIST(
         root=args.data,
         train=False,
         transform=transform,
-        download=args.download
+        download=args.download,
     )
 
-    total_images = min(
-        args.limit,
-        len(dataset)
-    )
+    total_images = min(args.limit, len(dataset))
 
-    if total_images <= 0:
-        raise ValueError(
-            "La cantidad de imágenes debe ser mayor que cero"
+    if total_images == 0:
+        raise ValueError("El conjunto de evaluación está vacío")
+
+    samples = [dataset[index] for index in range(total_images)]
+    images = torch.stack([sample[0] for sample in samples])
+    labels = torch.tensor([sample[1] for sample in samples])
+
+    # Todos los batches deben coincidir con la forma del grafo.
+    # Completar únicamente el último con ceros si fuera necesario.
+    # Esas muestras adicionales no participan en las métricas.
+    input_batches = []
+    valid_counts = []
+
+    for start in range(0, total_images, args.batch_size):
+        part = images[start:start + args.batch_size]
+        valid = part.shape[0]
+
+        batch = torch.zeros(
+            args.batch_size, 1, 28, 28,
+            dtype=torch.float32,
         )
+        batch[:valid].copy_(part)
 
-    print(f"Imágenes a evaluar: {total_images}")
+        input_batches.append(batch)
+        valid_counts.append(valid)
 
     # --------------------------------------------------------
-    # CARGAR MODELO PYTORCH
+    # Cargar modelo y calcular la referencia PyTorch
     # --------------------------------------------------------
-
-    print("\nCargando modelo de referencia PyTorch...")
-
     reference = ReferenceLeNet5().eval()
 
     state = torch.load(
         args.weights,
         map_location="cpu",
-        weights_only=True
+        weights_only=True,
     )
-
-    reference.load_state_dict(
-        state,
-        strict=True
-    )
-
-    # --------------------------------------------------------
-    # CARGAR MODELO FPGA
-    # --------------------------------------------------------
-
-    print("Cargando modelo FPGA...")
-
-    fpga_model = FpgaLeNet5().eval()
-
-    fpga_model.load_pytorch_weights(
-        args.weights
-    )
-
-    # --------------------------------------------------------
-    # CONSTRUIR EL DAG UNA SOLA VEZ
-    # --------------------------------------------------------
-
-    print("\nConstruyendo grafo de ejecución diferida...")
-
-    example_input = torch.zeros(
-        1, 1, 28, 28,
-        dtype=torch.float32
-    )
-
-    graph = FpgaGraph().build(
-        fpga_model,
-        example_input
-    )
-
-    print("Grafo construido correctamente.")
-
-    # --------------------------------------------------------
-    # INICIALIZAR MÉTRICAS
-    # --------------------------------------------------------
-
-    correct_pytorch = 0
-    correct_fpga = 0
-
-    different_predictions = 0
-    images_above_tolerance = 0
-
-    squared_error_sum = 0.0
-    total_output_elements = 0
-
-    global_max_error = 0.0
-
-    # --------------------------------------------------------
-    # EVALUAR LAS IMÁGENES
-    # --------------------------------------------------------
-
-    print("\nIniciando evaluación...\n")
+    reference.load_state_dict(state, strict=True)
 
     with torch.inference_mode():
+        expected = torch.cat([
+            reference(batch)[:valid]
+            for batch, valid in zip(input_batches, valid_counts)
+        ])
 
-        for index in range(total_images):
+    prediction_pytorch = expected.argmax(dim=1)
+    accuracy_pytorch = (
+        100.0 *
+        prediction_pytorch.eq(labels).sum().item() /
+        total_images
+    )
 
-            # Obtener imagen y etiqueta
-            image, real_label = dataset[index]
+    fpga_model = FpgaLeNet5().eval()
+    fpga_model.load_pytorch_weights(args.weights)
 
-            # Incorporar dimensión batch
-            input_tensor = image.unsqueeze(0).contiguous()
+    modes = (
+        ["sequential", "pipeline"]
+        if args.mode == "both"
+        else [args.mode]
+    )
 
-            # Ejecutar PyTorch
-            expected = reference(
-                input_tensor
+    timings = {mode: [] for mode in modes}
+
+    print("\n" + "-" * 60)
+    print("LeNet-5: ejecución secuencial y pipeline")
+    print(f"Imágenes reales: {total_images}")
+    print(f"Muestras por batch: {args.batch_size}")
+    print(f"Batches totales: {len(input_batches)}")
+    print(f"Batches por ventana: {args.inflight_batches}")
+    print(f"Repeticiones medidas por modo: {args.repeats}")
+    print(f"Accuracy PyTorch: {accuracy_pytorch:.2f}%")
+
+    padded = len(input_batches) * args.batch_size - total_images
+    print(f"Muestras de relleno: {padded}")
+    print("Tiempo: carga + ejecución + descarga y conversión")
+    print("-" * 60)
+
+    try:
+        # ----------------------------------------------------
+        # Construir una sola vez para el batch configurado
+        # ----------------------------------------------------
+        with torch.inference_mode():
+            graph = FpgaGraph().build(
+                fpga_model,
+                torch.zeros(
+                    args.batch_size, 1, 28, 28,
+                    dtype=torch.float32,
+                ),
             )
 
-            # Ejecutar DAG en FPGA
-            actual = graph.run(
-                input_tensor
-            )
+        # Después de cada ejecución deben permanecer únicamente
+        # los buffers que ya existían tras construir el grafo.
+        persistent_count = fpga_dag.buffer_count()
 
-            # -----------------------------------------------
-            # VALIDACIÓN NUMÉRICA
-            # -----------------------------------------------
+        def evaluate(mode):
+            elapsed = 0.0
+            collected = []
 
-            if actual.shape != expected.shape:
-                raise RuntimeError(
-                    "Forma de salida diferente en imagen "
-                    f"{index}: FPGA={tuple(actual.shape)}, "
-                    f"PyTorch={tuple(expected.shape)}"
+            with torch.inference_mode():
+                # Procesar ventanas para no cargar todas las
+                # entradas del conjunto simultáneamente en XRT.
+                for start in range(
+                    0,
+                    len(input_batches),
+                    args.inflight_batches,
+                ):
+                    window = input_batches[
+                        start:start + args.inflight_batches
+                    ]
+
+                    begin = time.perf_counter()
+                    outputs = graph.run_batches(window, mode=mode) #desde python acá se elige el pipeline, desde acá se envian los batches 
+                    elapsed += time.perf_counter() - begin
+
+                    if len(outputs) != len(window):
+                        raise RuntimeError(
+                            "Cantidad incorrecta de salidas"
+                        )
+
+                    # Validar y retirar el relleno fuera del tiempo.
+                    for offset, output in enumerate(outputs):
+                        if tuple(output.shape) != (
+                            args.batch_size, 10
+                        ):
+                            raise RuntimeError(
+                                "Forma de salida incorrecta: "
+                                f"{tuple(output.shape)}"
+                            )
+
+                        valid = valid_counts[start + offset]
+                        collected.append(output[:valid])
+
+                    if fpga_dag.buffer_count() != persistent_count:
+                        raise RuntimeError(
+                            "Quedaron activaciones activas "
+                            "después de descargar las salidas"
+                        )
+
+                actual = torch.cat(collected)
+
+                if actual.shape != expected.shape:
+                    raise RuntimeError(
+                        "La forma final no coincide con PyTorch"
+                    )
+
+                if not torch.isfinite(actual).all().item():
+                    raise RuntimeError(
+                        "La salida contiene valores no finitos"
+                    )
+
+                difference = (
+                    actual.to(torch.float64) -
+                    expected.to(torch.float64)
                 )
 
-            difference = (
-                actual - expected
-            ).to(torch.float64)
+                per_image_error = difference.abs().amax(dim=1)
+                maximum = per_image_error.max().item()
+                outside = (
+                    per_image_error > args.tolerance
+                ).sum().item()
 
-            squared_error_sum += float(
-                difference.square().sum()
+                rmse = difference.square().mean().sqrt().item()
+
+                predictions = actual.argmax(dim=1)
+                accuracy = (
+                    100.0 *
+                    predictions.eq(labels).sum().item() /
+                    total_images
+                )
+                different = predictions.ne(
+                    prediction_pytorch
+                ).sum().item()
+
+            if outside:
+                raise RuntimeError(
+                    f"{mode}: {outside} imágenes fuera de "
+                    f"tolerancia; error máximo={maximum:.6e}"
+                )
+
+            return elapsed, accuracy, rmse, maximum, different
+
+        # ----------------------------------------------------
+        # Calentar y medir alternando el orden de los modos
+        # ----------------------------------------------------
+        rounds = args.warmup + args.repeats
+
+        for round_index in range(rounds):
+            warmup = round_index < args.warmup
+
+            ordered_modes = (
+                modes if round_index % 2 == 0 else modes[::-1]
             )
 
-            total_output_elements += (
-                difference.numel()
-            )
+            for mode in ordered_modes:
+                if args.rest:
+                    time.sleep(args.rest)
 
-            image_max_error = float(
-                difference.abs().max()
-            )
+                elapsed, accuracy, rmse, maximum, different = (
+                    evaluate(mode)
+                )
 
-            global_max_error = max(
-                global_max_error,
-                image_max_error
-            )
-
-            if image_max_error > args.tolerance:
-                images_above_tolerance += 1
-
-            # -----------------------------------------------
-            # PREDICCIONES
-            # -----------------------------------------------
-
-            prediction_pytorch = int(
-                expected.argmax(dim=1).item()
-            )
-
-            prediction_fpga = int(
-                actual.argmax(dim=1).item()
-            )
-
-            if prediction_pytorch == real_label:
-                correct_pytorch += 1
-
-            if prediction_fpga == real_label:
-                correct_fpga += 1
-
-            if prediction_pytorch != prediction_fpga:
-                different_predictions += 1
-
-            # -----------------------------------------------
-            # MOSTRAR PROGRESO
-            # -----------------------------------------------
-
-            if (index + 1) % 200 == 0:
+                if warmup:
+                    label = (
+                        f"Calentamiento {round_index + 1}"
+                    )
+                else:
+                    number = round_index - args.warmup + 1
+                    label = f"Repetición {number}"
+                    timings[mode].append(elapsed)
 
                 print(
-                    f"Procesadas: "
-                    f"{index + 1}/{total_images}"
+                    f"{label} | {mode} | "
+                    f"{elapsed * 1000:.3f} ms | "
+                    f"Accuracy: {accuracy:.2f}% | "
+                    f"RMSE: {rmse:.3e} | "
+                    f"Máximo: {maximum:.3e} | "
+                    f"Predicciones diferentes: {different}",
+                    flush=True,
                 )
 
-    # --------------------------------------------------------
-    # CALCULAR MÉTRICAS FINALES
-    # --------------------------------------------------------
+        # ----------------------------------------------------
+        # Resumen de mediciones validadas
+        # ----------------------------------------------------
+        averages = {
+            mode: sum(values) / len(values)
+            for mode, values in timings.items()
+        }
 
-    accuracy_pytorch = (
-        100.0 * correct_pytorch / total_images
-    )
+        print("\n" + "-" * 60)
 
-    accuracy_fpga = (
-        100.0 * correct_fpga / total_images
-    )
+        for mode, average in averages.items():
+            print(
+                f"{mode}: {average * 1000:.3f} ms | "
+                f"{average * 1000 / total_images:.3f} ms/imagen | "
+                f"{total_images / average:.2f} imágenes/s"
+            )
 
-    global_rmse = math.sqrt(
-        squared_error_sum / total_output_elements
-    )
+        if args.mode == "both":
+            sequential = averages["sequential"]
+            pipeline = averages["pipeline"]
 
-    numeric_pass = (
-        images_above_tolerance == 0
-    )
+            print(f"Aceleración: {sequential / pipeline:.3f}x")
+            print(
+                "Reducción del tiempo: "
+                f"{100.0 * (1.0 - pipeline / sequential):.2f}%"
+            )
 
-    # --------------------------------------------------------
-    # PRESENTAR RESULTADOS
-    # --------------------------------------------------------
+    finally:
+        # Liberar XRT explícitamente antes de salir del proceso.
+        fpga_dag.shutdown()
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS DE EVALUACIÓN LENET-5 VS PYTORCH")
-    print("=" * 60)
-
-    print(
-        f"Imágenes evaluadas:       {total_images}"
-    )
-
-    print(
-        f"Correctas PyTorch:        {correct_pytorch}"
-    )
-
-    print(
-        f"Correctas FPGA:       {correct_fpga}"
-    )
-
-    print(
-        f"Accuracy PyTorch:         {accuracy_pytorch:.2f}%"
-    )
-
-    print(
-        f"Accuracy FPGA:        {accuracy_fpga:.2f}%"
-    )
-
-    print(
-        f"Predicciones diferentes:  {different_predictions}"
-    )
-
-    print(
-        f"RMSE global:              {global_rmse:.10e}"
-    )
-
-    print(
-        f"Error máximo global:      {global_max_error:.10e}"
-    )
-
-    print(
-        f"Imágenes fuera tolerancia:{images_above_tolerance}"
-    )
-
-    print(
-        f"Tolerancia utilizada:     {args.tolerance:.1e}"
-    )
-
-    print(
-        "\nValidación numérica: "
-        f"{'PASS' if numeric_pass else 'FAIL'}"
-    )
-
-    print("=" * 60)
-
-    if not numeric_pass:
-        raise SystemExit(1)
-
+    print("PASS: validación numérica y limpieza completadas.")
 
 if __name__ == "__main__":
     main()

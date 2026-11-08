@@ -1,0 +1,22 @@
+
+# Archivos generados por compilación
+*.o
+*.so
+*.pyc
+*.xclbin
+*.bit.bin
+*.dtbo
+__pycache__/
+
+# Ejecutables de pruebas
+chained_implementation/host/wrappers/*/*_host
+chained_implementation/host/wrappers/*/test_conv2d_package
+chained_implementation/tests/test_pipeline_kernels
+chained_implementation/tests/test_pipeline_relu_tanh
+
+# Archivos de ejecución
+chained_implementation/results/
+chained_implementation/test_images/imagenet128/
+
+# Datasets descargados
+chained_implementation/data/MNIST/

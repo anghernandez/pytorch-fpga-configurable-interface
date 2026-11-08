@@ -221,3 +221,25 @@ test-mobilenetv2: $(TARGET)
 		exit 1; \
 	fi
 	$(PYTHON) -u $(TESTS_DIR)/test_mobilenetv2_fpga.py "$(IMAGE)"
+
+
+# ------------------------------------------------------------
+# PRUEBA DE PIPELINE: RELU6 -> TANH CON DOS BATCHES
+# ------------------------------------------------------------
+
+PIPELINE_TEST := $(TESTS_DIR)/test_pipeline_kernels
+
+.PHONY: test-pipeline
+
+$(PIPELINE_TEST): $(TESTS_DIR)/test_pipeline_kernels.cpp \
+                  $(WRAPPER_SOURCES) $(RUNTIME_SOURCE) $(HEADERS)
+	$(CXX) -O2 -std=c++17 \
+		$(INCLUDES) \
+		$(TESTS_DIR)/test_pipeline_kernels.cpp \
+		$(WRAPPER_SOURCES) \
+		$(RUNTIME_SOURCE) \
+		-o $@ \
+		$(LIBS)
+
+test-pipeline: $(PIPELINE_TEST)
+	./$(PIPELINE_TEST)
